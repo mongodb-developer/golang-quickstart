@@ -1,5 +1,7 @@
 vendor
 Gopkg.lock
 
+main.temp
+
 .DS_Store
 Thumbs.db
