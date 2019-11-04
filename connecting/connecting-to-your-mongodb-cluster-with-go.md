@@ -11,19 +11,25 @@ When it comes to future tutorials in the series, expect content on the following
 
 Go is one of the more recent of the officially supported technologies with MongoDB, and in my personal opinion, it is one of the most awesome!
 
-Throughout these tutorials, I'll be using Visual Studio Code (VS Code) for development, and I'll be connecting to a MongoDB Atlas cluster. The assumption is that you're using Go 1.13 or newer and that it is already properly installed and configured on your computer. It is also assumed that an Atlas cluster has already been created.
+Throughout these tutorials, I'll be using Visual Studio Code (VS Code) for development, and I'll be connecting to a MongoDB Atlas cluster. The assumption is that you're using Go 1.13 or newer and that it is already properly installed and configured on your computer along with [dep](https://github.com/golang/dep) as the dependency management tool. It is also assumed that an Atlas cluster has already been created.
 
 > Get started with an M0 cluster on [MongoDB Atlas](https://www.mongodb.com/cloud) today. It's free forever and you'll be able to work alongside this blog series. Use promo code NRABOY200 when you sign up and you'll get an extra $200.00 credit applied to your account.
 
-If you're using a different IDE, O/S, etcect., the walkthrough might be slightly different, but the code will be pretty much the same.
+If you're using a different IDE, O/S, etc., the walk-through might be slightly different, but the code will be pretty much the same.
 
 ## Getting Started
 
-Within your `$GOPATH`, create a new project directly titled `quickstart` and add a `main.go` file to that project.
+Within your `$GOPATH`, create a new project directory titled `quickstart` and add a `main.go` file to that project.
 
-For this particular tutorial, all code will be added to the `main.go` file.
+For this particular tutorial, all code will be added to the `main.go` file. We can start the `main.go` file with the following boilerplate code, necessary for our dependency manager:
 
-With the project created, the next step is to install the MongoDB Go Driver through the Go Package Manager. To do this, execute the following from the command line:
+```golang
+package main
+
+func main() { }
+```
+
+The next step is to install the MongoDB Go Driver through the Go Package Manager. To do this, execute the following from the command line:
 
 ```bash
 $ dep init
@@ -32,7 +38,7 @@ $ dep ensure -add "go.mongodb.org/mongo-driver/mongo@~1.1.2"
 
 Note that for this tutorial we're using `dep` to manage our packages and we're using version 1.1.2 of the MongoDB Go Driver. If you don't have `dep`, you can install it through the [official documentation](https://github.com/golang/dep).
 
-With the driver installed, open the project's `main.go` file and add the following boilerplate code:
+With the driver installed, open the project's `main.go` file and add the following imports to the code:
 
 ```golang
 package main
@@ -61,7 +67,7 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
-	ctx, _ = context.WithTimeout(context.Background(), 10*time.Second)
+	ctx, _ := context.WithTimeout(context.Background(), 10*time.Second)
 	err = client.Connect(ctx)
 	if err != nil {
 		log.Fatal(err)
@@ -71,6 +77,14 @@ func main() {
 ```
 
 There are a few things that are happening in the above code. First we're configuring our client to use the correct URI, but we're not yet connecting to it. Assuming nothing is malformed and no error was thrown, we can define a timeout duration that we want to use when trying to connect. The ten seconds I used might be a little too generous for your needs, but feel free to play around with the value that makes the most sense to you.
+
+In regards to the Atlas URI, you can use any of the driver URIs from the Atlas dashboard. They'll look something like this:
+
+```
+mongodb+srv://<username>:<password>@cluster0-zzart.mongodb.net/test?retryWrites=true&w=majority
+```
+
+Just remember, to use the information that Atlas provides for your particular cluster.
 
 After connecting, if there isn't an error, we can defer the closing of the connection for when the `main` function exits. This will keep the connection to the database open until we're done.
 
