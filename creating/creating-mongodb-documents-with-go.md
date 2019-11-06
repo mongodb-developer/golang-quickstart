@@ -19,9 +19,9 @@ The assumption is that you've configured everything prior to using this tutorial
 
 ## Understanding the Data
 
-As a refresher, MongoDB stores data in JSON Documents, which are actually Binary JSON (BSON) objects stored on disk. We won't get into the nitty gritty of how MongoDB works with JSON and BSON in this particular series, but we will familiarize ourselves with some of the data we'll be working with going forward.
+As a refresher, MongoDB stores data in JSON documents, which are actually Binary JSON (BSON) objects stored on disk. We won't get into the nitty gritty of how MongoDB works with JSON and BSON in this particular series, but we will familiarize ourselves with some of the data we'll be working with going forward.
 
-Take the following MongoDB Documents for example:
+Take the following MongoDB documents for example:
 
 ```json
 {
@@ -31,7 +31,7 @@ Take the following MongoDB Documents for example:
 }
 ```
 
-The above Document might represent a podcast show that has any number of episodes. Any Document that represents a show might appear in a `podcasts` collection. There will also be a Document that looks like the following:
+The above document might represent a podcast show that has any number of episodes. Any document that represents a show might appear in a `podcasts` collection. There will also be a document that looks like the following:
 
 ```json
 {
@@ -43,20 +43,21 @@ The above Document might represent a podcast show that has any number of episode
 }
 ```
 
-The above Document might represent a podcast episode. Any Document that represents an episode might appear in an `episodes` collection. Neither of these two Documents are particularly complex, but we'll see different variations of them as we progress through the series.
+The above document might represent a podcast episode. Any document that represents an episode might appear in an `episodes` collection. Neither of these two documents are particularly complex, but we'll see different variations of them as we progress through the series.
 
-## Connecting to a Specific Collection
+## Getting a Handle to a Specific Collection
 
-Before data can be created or queried, a connection to a collection must be defined. It doesn't matter if the database or collection exists prior on the cluster as it will be created automatically if it does not.
+Before data can be created or queried, a handle to a collection must be defined. It doesn't matter if the database or collection already exists on the cluster as it will be created automatically when the first document is inserted if it does not.
 
-Since we will be using two different collections, the following can be done in Go to establish the connection:
+Since we will be using two different collections, the following can be done in Go to establish the collection handles:
 
 ```golang
-podcastsCollection := client.Database("quickstart").Collection("podcasts")
-episodesCollection := client.Database("quickstart").Collection("episodes")
+quickstartDatabase := client.Database("quickstart")
+podcastsCollection := quickstartDatabase.Collection("podcasts")
+episodesCollection := quickstartDatabase.Collection("episodes")
 ```
 
-The above code uses a `client` that is already connected to our cluster, and establishes a connection to our desired database. In this case, the database is `quickstart`. Again, if it doesn't already exist, it is fine. We are also establishing a connection to two different collections, both of which don't need to exist. The `client` variable was configured in the [previous tutorial](https://) in the series.
+The above code uses a `client` that is already connected to our cluster, and establishes a handle for our desired database. In this case, the database is `quickstart`. Again, if it doesn't already exist, it is fine. We are also establishing handles to two different collections, both of which don't need to exist. The `client` variable was configured in the [previous tutorial](https://) in the series.
 
 Looking at our code thus far, we might have something that looks like the following:
 
@@ -83,19 +84,22 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
-	defer client.Disconnect(ctx)
-	podcastsCollection := client.Database("quickstart").Collection("podcasts")
-	episodesCollection := client.Database("quickstart").Collection("episodes")
+    defer client.Disconnect(ctx)
+
+
+    quickstartDatabase := client.Database("quickstart")
+    podcastsCollection := quickstartDatabase.Collection("podcasts")
+    episodesCollection := quickstartDatabase.Collection("episodes")
 }
 ```
 
-Between this tutorial and the [first tutorial](https://) in the series, the cluster ping logic and listing of database logic was removed. Instead, we're just connecting to the cluster and connecting to our collections in a particular database.
+Between this tutorial and the [first tutorial](https://) in the series, the cluster ping logic and listing of database logic was removed. Instead, we're just connecting to the cluster and creating handles to our collections in a particular database.
 
 ## Creating One or Many BSON Documents in a Single Request
 
 Now that we have a `podcastsCollection` and an `episodesCollection` variable, we can proceed to create data and insert it into either of the collections.
 
-For this example, I won't be using a pre-defined schema. In a future tutorial, we'll see how to map Documents to native Go data structures, but for now, we're going to look at other options.
+For this example, I won't be using a pre-defined schema. In a future tutorial, we'll see how to map documents to native Go data structures, but for now, we're going to look at other options.
 
 Take the following command for example:
 
@@ -106,7 +110,7 @@ podcastsCollection.InsertOne(ctx, bson.D{
 })
 ```
 
-The above command will insert a single Document into the `podcasts` collection. While the above example is rather flat, it could be adjusted to be more complex. Take the following example:
+The above command will insert a single document into the `podcasts` collection. While the above example is rather flat, it could be adjusted to be more complex. Take the following example:
 
 ```golang
 podcastsCollection.InsertOne(ctx, bson.D{
@@ -116,7 +120,7 @@ podcastsCollection.InsertOne(ctx, bson.D{
 })
 ```
 
-The above example adds a `tags` field to the Document which is an array. So far we've seen `bson.D` which is a Document and `bson.A` which is an array. There are other options which can be found in the documentation for the MongoDB Go driver.
+The above example adds a `tags` field to the document which is an array. So far we've seen `bson.D` which is a document and `bson.A` which is an array. There are other options which can be found in the documentation for the MongoDB Go driver.
 
 If we wanted to, usage of the `bson.D` and `bson.A` data structures could be drastically simplified. Take the following simplification:
 
@@ -149,9 +153,9 @@ episodesCollection.InsertMany(ctx, []interface{}{
 })
 ```
 
-In the above example you'll notice that we are using a slice of `interface{}` which represents each of the Documents that we wish to insert. For each of the Documents, the same `bson.D` rules are applied, as seen previously.
+In the above example you'll notice that we are using a slice of `interface{}` which represents each of the documents that we wish to insert. For each of the documents, the same `bson.D` rules are applied, as seen previously.
 
-To clean up any loose ends, you'll remember that the `podcast` field for a Document is actually an `ObjectId`. This is based on the very brief data model that was seen at the beginning of the tutorial. Rather than trying to add the id as a string or an integer, it has to be properly converted.
+To clean up any loose ends, you'll remember that the `podcast` field for a document is actually an `ObjectId`. This is based on the very brief data model that was seen at the beginning of the tutorial. Rather than trying to add the id as a string or an integer, it has to be properly converted.
 
 Take the following for example:
 
@@ -159,10 +163,10 @@ Take the following for example:
 id, _ := primitive.ObjectIDFromHex("5dbb2038e7841e4744f57a9c")
 ```
 
-After determining the hash for a Document, it can be used as a parameter in the `ObjectIDFromHex` function to convert it into a properly formated MongoDB Document id.
+After determining the hash for a document, it can be used as a parameter in the `ObjectIDFromHex` function to convert it into a properly formated MongoDB document id.
 
 ## Conclusion
 
-You just saw how to insert Documents into a MongoDB cluster using the Go programming language. In this particular part of the series, primitive data structures were used to save us from having to pre-define a schema. In a future tutorial, we're going to see how to make our projects more manageable by defining how MongoDB Documents can be mapped to Go data structures.
+You just saw how to insert documents into a MongoDB cluster using the Go programming language. In this particular part of the series, primitive data structures were used to save us from having to pre-define a schema. In a future tutorial, we're going to see how to make our projects more manageable by defining how MongoDB documents can be mapped to Go data structures.
 
 With data in the database, the next part of the getting started series will include how to query for the data using Go.
