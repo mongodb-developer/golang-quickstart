@@ -22,6 +22,7 @@ func main() {
 		log.Fatal(err)
 	}
 	defer client.Disconnect(ctx)
+
 	quickstartDatabase := client.Database("quickstart")
 	podcastsCollection := quickstartDatabase.Collection("podcasts")
 	episodesCollection := quickstartDatabase.Collection("episodes")
@@ -33,6 +34,7 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
+
 	episodeResult, err := episodesCollection.InsertMany(ctx, []interface{}{
 		bson.D{
 			{"podcast", podcastResult.InsertedID},

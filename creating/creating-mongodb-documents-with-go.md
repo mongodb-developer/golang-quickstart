@@ -73,15 +73,15 @@ import (
 )
 
 func main() {
-	client, err := mongo.NewClient(options.Client().ApplyURI("<ATLAS_URI_HERE>"))
-	if err != nil {
-		log.Fatal(err)
-	}
-	ctx, _ := context.WithTimeout(context.Background(), 10*time.Second)
-	err = client.Connect(ctx)
-	if err != nil {
-		log.Fatal(err)
-	}
+    client, err := mongo.NewClient(options.Client().ApplyURI("<ATLAS_URI_HERE>"))
+    if err != nil {
+        log.Fatal(err)
+    }
+    ctx, _ := context.WithTimeout(context.Background(), 10*time.Second)
+    err = client.Connect(ctx)
+    if err != nil {
+        log.Fatal(err)
+    }
     defer client.Disconnect(ctx)
 
     quickstartDatabase := client.Database("quickstart")
@@ -131,7 +131,7 @@ podcastResult, err := podcastsCollection.InsertOne(ctx, bson.D{
 
 Notice that in the above example, the `Key` and `Value` properties were removed. It is up to you to decide how you want to use each of the data structures that the MongoDB Go driver offers.
 
-The `InsertOne` function returns both an `InsertOneResult` and an error. If there was no error, the `InsertOneResult`, as shown through a `podcastResult` variable in this example, has an `InsertedID` interface. This is helpful if you need to reference the newly created document in future operations. We'll see more on this shortly.
+The `InsertOne` function returns both an `InsertOneResult` and an error. If there was no error, the `InsertOneResult`, as shown through a `podcastResult` variable in this example, has an `InsertedID` field. This is helpful if you need to reference the newly created document in future operations. We'll see more on this shortly.
 
 In the previous few examples, the `InsertOne` function was used, which only creates a single document. If you wanted to create multiple documents, you could make use of the `InsertMany` function like follows:
 
@@ -156,9 +156,9 @@ if err != nil {
 fmt.Printf("Inserted %v documents into episode collection!\n", len(episodeResult.InsertedIDs))
 ```
 
-In the above example you'll notice that we are using a slice of `interface{}` which represents each of the documents that we wish to insert. For each of the documents, the same `bson.D` rules are applied, as seen previously. Also notice that the `InsertedID` from the previous insert operation was used to reference the parent level podcast for each episode inserted.
+In the above example you'll notice that we are using a slice of `interface{}` which represents each of the documents that we wish to insert. For each of the documents, the same `bson.D` rules are applied, as seen previously. Also notice that the `InsertedID` from the previous insert operation was used to reference the parent podcast for each episode inserted.
 
-Rather than returning an `InsertOneResult`, the `InsertMany` function returns an `InsertManyResult`. However, this behaves in a similar fashion, with the exception that now we have access to `InsertedIDs` which is an interface slice. This slice will contain the ids to each of the inserted episodes for this particular example.
+Rather than returning an `InsertOneResult`, the `InsertMany` function returns an `InsertManyResult`. However, this behaves in a similar fashion, with the exception that now we have access to `InsertedIDs` which is an `[]interface{}`. This slice will contain the ids to each of the inserted episodes for this particular example.
 
 ## Conclusion
 
