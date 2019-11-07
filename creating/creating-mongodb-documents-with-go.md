@@ -1,6 +1,6 @@
 # Quick Start: Creating MongoDB Documents with Go
 
-In a [previous tutorial](https://), I demonstrated how to connect to a MongoDB cluster with the Go programming language (Golang) and verify the connection through pinging the cluster and outputting the available databases. In this tutorial, we're going to continue with the getting started material, but this time connecting to a particular collection to create new documents. This will continue to use the Go programming language.
+In a [previous tutorial](https://www.mongodb.com/blog/post/quick-start-golang--mongodb--starting-and-setup), I demonstrated how to connect to a MongoDB cluster with the Go programming language (Golang) and verify the connection through pinging the cluster and outputting the available databases. In this tutorial, we're going to continue with the getting started material, but this time connecting to a particular collection to create new documents. This will continue to use the Go programming language.
 
 ## Tools and Versions for the Tutorial Series
 
@@ -57,7 +57,7 @@ podcastsCollection := quickstartDatabase.Collection("podcasts")
 episodesCollection := quickstartDatabase.Collection("episodes")
 ```
 
-The above code uses a `client` that is already connected to our cluster, and establishes a handle for our desired database. In this case, the database is `quickstart`. Again, if it doesn't already exist, it is fine. We are also establishing handles to two different collections, both of which don't need to exist. The `client` variable was configured in the [previous tutorial](https://) in the series.
+The above code uses a `client` that is already connected to our cluster, and establishes a handle for our desired database. In this case, the database is `quickstart`. Again, if it doesn't already exist, it is fine. We are also establishing handles to two different collections, both of which don't need to exist. The `client` variable was configured in the [previous tutorial](https://www.mongodb.com/blog/post/quick-start-golang--mongodb--starting-and-setup) in the series.
 
 Looking at our code thus far, we might have something that looks like the following:
 
@@ -90,7 +90,7 @@ func main() {
 }
 ```
 
-Between this tutorial and the [first tutorial](https://) in the series, the cluster ping logic and listing of database logic was removed. Instead, we're just connecting to the cluster and creating handles to our collections in a particular database.
+Between this tutorial and the [first tutorial](https://www.mongodb.com/blog/post/quick-start-golang--mongodb--starting-and-setup) in the series, the cluster ping logic and listing of database logic was removed. Instead, we're just connecting to the cluster and creating handles to our collections in a particular database.
 
 ## Creating One or Many BSON Documents in a Single Request
 
