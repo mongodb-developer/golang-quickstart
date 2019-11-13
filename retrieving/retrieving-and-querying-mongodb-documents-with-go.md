@@ -81,6 +81,7 @@ cursor, err := episodesCollection.Find(ctx, bson.M{})
 if err != nil {
     log.Fatal(err)
 }
+defer cursor.Close(ctx)
 for cursor.Next(ctx) {
     var episode bson.M
     if err = cursor.Decode(&episode); err != nil {
@@ -88,7 +89,6 @@ for cursor.Next(ctx) {
     }
     fmt.Println(episode)
 }
-cursor.Close(ctx)
 ```
 
 In both the `*mongo.Cursor.All` and `*mongo.Cursor.Find` examples, the data is loaded into `bson.M` data structures which behave as maps. We'll explore marshalling and unmarshalling the data to custom native Go data structures in a later tutorial.
