@@ -91,7 +91,7 @@ for cursor.Next(ctx) {
 }
 ```
 
-In both the `*mongo.Cursor.All` and `*mongo.Cursor.Find` examples, the data is loaded into `bson.M` data structures which behave as maps. We'll explore marshalling and unmarshalling the data to custom native Go data structures in a later tutorial.
+In both the `*mongo.Cursor.All` and `*mongo.Cursor.Next` examples, the data is loaded into `bson.M` data structures which behave as maps. We'll explore marshalling and unmarshalling the data to custom native Go data structures in a later tutorial.
 
 ## Reading a Single Document from a Collection
 
@@ -124,18 +124,15 @@ In the previous examples of `Find` and `FindOne`, we've seen the `bson.M` filter
 Let's say that we want to filter our results to only include podcast episodes that are exactly 25 minutes. We could do something like the following:
 
 ```go
-cursor, err := episodesCollection.Find(ctx, bson.M{"duration": 25})
+filterCursor, err := episodesCollection.Find(ctx, bson.M{"duration": 25})
 if err != nil {
     log.Fatal(err)
 }
-defer cursor.Close(ctx)
-for cursor.Next(ctx) {
-    var episode bson.M
-    if err = cursor.Decode(&episode); err != nil {
-        log.Fatal(err)
-    }
-    fmt.Println(episode)
+var episodesFiltered []bson.M
+if err = filterCursor.All(ctx, &episodesFiltered); err != nil {
+    log.Fatal(err)
 }
+fmt.Println(episodesFiltered)
 ```
 
 To get an idea of what is a valid filter, check out the [MongoDB documentation](https://docs.mongodb.com/manual/reference/operator/query/#query-selectors) on the subject.
@@ -151,15 +148,15 @@ Let's say we want to query for all podcast episodes that are longer than 24 minu
 ```go
 opts := options.Find()
 opts.SetSort(bson.D{{"duration", -1}})
-cursor, err = episodesCollection.Find(ctx, bson.D{{"duration", bson.D{{"$gt", 24}}}}, opts)
+sortCursor, err := episodesCollection.Find(ctx, bson.D{{"duration", bson.D{{"$gt", 24}}}}, opts)
 if err != nil {
     log.Fatal(err)
 }
-var episodes []bson.M
-if err = cursor.All(ctx, &episodes); err != nil {
+var episodesSorted []bson.M
+if err = sortCursor.All(ctx, &episodesSorted); err != nil {
     log.Fatal(err)
 }
-fmt.Println(episodes)
+fmt.Println(episodesSorted)
 ```
 
 Notice that a few things have changed in the above example. First, we're defining our `FindOptions` and the field we want to sort on. Within the `Find` function we are passing those options, but we're also using `bson.D` instead of `bson.M`. When using `bson.M`, the order of the fields does not matter, which makes it challenging for certain queries, more specifically range queries and similar. Instead we can use `bson.D` which respects the order that each field or operator uses.
