@@ -57,7 +57,9 @@ if err != nil {
     log.Fatal(err)
 }
 var episodes []bson.M
-cursor.All(ctx, &episodes)
+if err = cursor.All(ctx, &episodes); err != nil {
+    log.Fatal(err)
+}
 fmt.Println(episodes)
 ```
 
@@ -99,8 +101,7 @@ Take the following example:
 
 ```go
 var podcast bson.M
-err = podcastsCollection.FindOne(ctx, bson.M{}).Decode(&podcast)
-if err != nil {
+if err = podcastsCollection.FindOne(ctx, bson.M{}).Decode(&podcast); err != nil {
     log.Fatal(err)
 }
 fmt.Println(podcast)
@@ -127,12 +128,14 @@ cursor, err := episodesCollection.Find(ctx, bson.M{"duration": 25})
 if err != nil {
     log.Fatal(err)
 }
+defer cursor.Close(ctx)
 for cursor.Next(ctx) {
     var episode bson.M
-    cursor.Decode(&episode)
+    if err = cursor.Decode(&episode); err != nil {
+        log.Fatal(err)
+    }
     fmt.Println(episode)
 }
-cursor.Close(ctx)
 ```
 
 To get an idea of what is a valid filter, check out the [MongoDB documentation](https://docs.mongodb.com/manual/reference/operator/query/#query-selectors) on the subject.
@@ -153,7 +156,9 @@ if err != nil {
     log.Fatal(err)
 }
 var episodes []bson.M
-cursor.All(ctx, &episodes)
+if err = cursor.All(ctx, &episodes); err != nil {
+    log.Fatal(err)
+}
 fmt.Println(episodes)
 ```
 

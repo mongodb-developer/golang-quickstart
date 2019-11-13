@@ -22,27 +22,34 @@ func main() {
 		log.Fatal(err)
 	}
 	defer client.Disconnect(ctx)
+
 	podcastsCollection := client.Database("quickstart").Collection("podcasts")
 	episodesCollection := client.Database("quickstart").Collection("episodes")
+
 	var podcast bson.M
 	err = podcastsCollection.FindOne(ctx, bson.M{}).Decode(&podcast)
 	if err != nil {
 		log.Fatal(err)
 	}
 	fmt.Println(podcast)
+
 	cursor, err := episodesCollection.Find(ctx, bson.M{"duration": 25})
 	if err != nil {
 		log.Fatal(err)
 	}
 	var episodes []bson.M
-	cursor.All(ctx, &episodes)
+	if err = cursor.All(ctx, &episodes); err != nil {
+		log.Fatal(err)
+	}
 	fmt.Println(episodes)
+
 	opts := options.Find()
 	opts.SetSort(bson.D{{"duration", -1}})
 	cursor, err = episodesCollection.Find(ctx, bson.D{{"duration", bson.D{{"$gt", 24}}}}, opts)
 	if err != nil {
 		log.Fatal(err)
 	}
+	defer cursor.Close(ctx)
 	for cursor.Next(ctx) {
 		var episode bson.M
 		if err = cursor.Decode(&episode); err != nil {
@@ -50,5 +57,4 @@ func main() {
 		}
 		fmt.Println(episode)
 	}
-	cursor.Close(ctx)
 }
