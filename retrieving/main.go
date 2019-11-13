@@ -26,22 +26,7 @@ func main() {
 	podcastsCollection := client.Database("quickstart").Collection("podcasts")
 	episodesCollection := client.Database("quickstart").Collection("episodes")
 
-	var podcast bson.M
-	if err = podcastsCollection.FindOne(ctx, bson.M{}).Decode(&podcast); err != nil {
-		log.Fatal(err)
-	}
-	fmt.Println(podcast)
-
-	filterCursor, err := episodesCollection.Find(ctx, bson.M{"duration": 25})
-	if err != nil {
-		log.Fatal(err)
-	}
-	var episodesFiltered []bson.M
-	if err = filterCursor.All(ctx, &episodesFiltered); err != nil {
-		log.Fatal(err)
-	}
-	fmt.Println(episodesFiltered)
-
+	// Retrieve All Documents
 	cursor, err := episodesCollection.Find(ctx, bson.M{})
 	if err != nil {
 		log.Fatal(err)
@@ -55,6 +40,25 @@ func main() {
 		fmt.Println(episode)
 	}
 
+	// Retrieve A Single Document
+	var podcast bson.M
+	if err = podcastsCollection.FindOne(ctx, bson.M{}).Decode(&podcast); err != nil {
+		log.Fatal(err)
+	}
+	fmt.Println(podcast)
+
+	// Find Documents Matching A Filter
+	filterCursor, err := episodesCollection.Find(ctx, bson.M{"duration": 25})
+	if err != nil {
+		log.Fatal(err)
+	}
+	var episodesFiltered []bson.M
+	if err = filterCursor.All(ctx, &episodesFiltered); err != nil {
+		log.Fatal(err)
+	}
+	fmt.Println(episodesFiltered)
+
+	// Find Documents Matching Filter And Sort
 	opts := options.Find()
 	opts.SetSort(bson.D{{"duration", -1}})
 	sortCursor, err := episodesCollection.Find(ctx, bson.D{{"duration", bson.D{{"$gt", 24}}}}, opts)
