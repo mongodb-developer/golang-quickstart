@@ -1,6 +1,6 @@
 # Quick Start: Retrieving and Querying MongoDB Documents with Go
 
-In a [previous tutorial](https://), I had written about creating documents to be inserted into MongoDB with the Go programming language. In that tutorial we explored the `Insert` and `InsertMany` functions while making use of `bson.D`, `bson.M`, and similar MongoDB data types.
+In a [previous tutorial](https://www.mongodb.com/blog/post/quick-start-golang--mongodb--how-to-create-documents), I had written about creating documents to be inserted into MongoDB with the Go programming language. In that tutorial we explored the `Insert` and `InsertMany` functions while making use of `bson.D`, `bson.M`, and similar MongoDB data types.
 
 This time around, we're going to explore reading documents from MongoDB and creating queries to retrieve documents based on certain criteria. This will all be done with Golang and the MongoDB Go Driver.
 
@@ -21,7 +21,7 @@ If you need help connecting to MongoDB Atlas, installing the MongoDB Go Driver, 
 
 ## The Previously Created Data
 
-When thinking back to the data that we created in the [previous tutorial](https://), we know that we have a `podcasts` collection with data that looks something like this:
+When thinking back to the data that we created in the [previous tutorial](https://www.mongodb.com/blog/post/quick-start-golang--mongodb--how-to-create-documents), we know that we have a `podcasts` collection with data that looks something like this:
 
 ```json
 {
