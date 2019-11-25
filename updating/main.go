@@ -23,8 +23,11 @@ func main() {
 		log.Fatal(err)
 	}
 	defer client.Disconnect(ctx)
+
 	podcastsCollection := client.Database("quickstart").Collection("podcasts")
-	id, _ := primitive.ObjectIDFromHex("5d9e0173c1305d2a54eb431a")
+
+	// Update a single document based on a document id hash
+	id, _ := primitive.ObjectIDFromHex("5dd890a61c9d4400003f3a31")
 	result, err := podcastsCollection.UpdateOne(
 		ctx,
 		bson.M{"_id": id},
@@ -36,6 +39,8 @@ func main() {
 		log.Fatal(err)
 	}
 	fmt.Printf("Updated %v Documents!\n", result.MatchedCount)
+
+	// Update zero or more documents based on a filter criteria
 	result, err = podcastsCollection.UpdateMany(
 		ctx,
 		bson.M{"title": "The Polyglot Developer Podcast"},
@@ -46,7 +51,9 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
-	fmt.Printf("Updated %v Documents!\n", result.MatchedCount)
+	fmt.Printf("Updated %v Documents!\n", result.ModifiedCount)
+
+	// Update zero or more documents and add a field that may not exist to the document
 	result, err = podcastsCollection.UpdateMany(
 		ctx,
 		bson.M{"title": "The Polyglot Developer Podcast"},
@@ -57,5 +64,16 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
-	fmt.Printf("Updated %v Documents!\n", result.MatchedCount)
+	fmt.Printf("Updated %v Documents!\n", result.ModifiedCount)
+
+	// Repace an entire single document based on a filter criteria
+	result, err = podcastsCollection.ReplaceOne(
+		ctx,
+		bson.M{"author": "Nic Raboy"},
+		bson.M{
+			"title":  "The Nic Raboy Show",
+			"author": "Nicolas Raboy",
+		},
+	)
+	fmt.Printf("Replaced %v Documents!\n", result.ModifiedCount)
 }
