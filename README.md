@@ -8,7 +8,7 @@ A Quick Start series for developing applications with the Go programming languag
 2. [Creating MongoDB Documents with Go](creating/creating-mongodb-documents-with-go.md)
 3. [Retrieving and Querying MongoDB Documents with Go](retrieving/retrieving-and-querying-mongodb-documents-with-go.md)
 4. Updating MongoDB Documents with Go
-5. Deleting MongoDB Documents with Go
+5. [Deleting MongoDB Documents with Go](deleting/deleting-documents-in-a-mongodb-collection-with-go.md)
 6. Modeling MongoDB Documents with Native Go Data Structures 
 7. Performing Complex MongoDB Data Aggregation Queries with Go
 8. Reacting to Database Changes with MongoDB Change Streams and Go
