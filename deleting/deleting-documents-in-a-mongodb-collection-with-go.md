@@ -82,7 +82,7 @@ if err != nil {
 fmt.Printf("DeleteMany removed %v document(s)\n", result.DeletedCount)
 ```
 
-In the above example, pretty much everything is the same. The exception is that we're using a different collection and we're using the `DeleteMany` function. In this example, any document that has a field `duration` that equals `25`, they will be deleted.
+In the above example, pretty much everything is the same. The exception is that we're using a different collection and we're using the `DeleteMany` function. In this example, any document that has a field `duration` that equals `25` will be deleted.
 
 In both the `DeleteOne` and `DeleteMany` examples both range and equality filters can be used. More information on the available operators can be found in the [documentation](https://docs.mongodb.com/manual/reference/operator/query/).
 
@@ -96,7 +96,7 @@ if err = podcastsCollection.Drop(ctx); err != nil {
 }
 ```
 
-Dropping an entire collection will return an error if something has failed.
+Dropping an entire collection will return an error if something has failed. If the collection doesn't exist, the driver will mask the server error and in this case return a `nil` error.
 
 ## The Final Code
 
