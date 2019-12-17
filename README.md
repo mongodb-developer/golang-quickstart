@@ -7,7 +7,7 @@ A Quick Start series for developing applications with the Go programming languag
 1. [How to Get Connected to Your MongoDB Cluster with Go](connecting/connecting-to-your-mongodb-cluster-with-go.md)
 2. [Creating MongoDB Documents with Go](creating/creating-mongodb-documents-with-go.md)
 3. [Retrieving and Querying MongoDB Documents with Go](retrieving/retrieving-and-querying-mongodb-documents-with-go.md)
-4. Updating MongoDB Documents with Go
+4. [Updating MongoDB Documents with Go](updating/updating-mongodb-documents-with-go.md)
 5. [Deleting MongoDB Documents with Go](deleting/deleting-documents-in-a-mongodb-collection-with-go.md)
 6. Modeling MongoDB Documents with Native Go Data Structures 
 7. Performing Complex MongoDB Data Aggregation Queries with Go
