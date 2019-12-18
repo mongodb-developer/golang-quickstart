@@ -88,7 +88,7 @@ In both the `DeleteOne` and `DeleteMany` examples both range and equality filter
 
 ## Dropping a MongoDB Collection and All Documents within the Collection
 
-Removing a single document or many documents isn't the only option. Entire collections can be dropped which would remove all documents in the collection without using a filter. An example of this can be seen below:
+Removing a single document or many documents isn't the only option. Entire collections can be dropped which would remove all documents and meta data, such as indexes, in the collection without using a filter. An example of this can be seen below:
 
 ```go
 if err = podcastsCollection.Drop(ctx); err != nil {
