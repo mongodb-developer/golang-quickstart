@@ -12,7 +12,7 @@ import (
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
-// The MongoDB document schema for the "Podcasts" collection
+// Podcast represents the schema for the "Podcasts" collection
 type Podcast struct {
 	ID     primitive.ObjectID `bson:"_id,omitempty"`
 	Title  string             `bson:"title,omitempty"`
@@ -20,7 +20,7 @@ type Podcast struct {
 	Tags   []string           `bson:"tags,omitempty"`
 }
 
-// The MongoDB document schema for the "Episodes" collection
+// Episode represents the schema for the "Episodes" collection
 type Episode struct {
 	ID          primitive.ObjectID `bson:"_id,omitempty"`
 	Podcast     primitive.ObjectID `bson:"podcast,omitempty"`

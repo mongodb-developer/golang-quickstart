@@ -48,7 +48,7 @@ type Podcast struct {
 }
 ```
 
-The above data structure is nearly identical to the `bson.M` that was used previously, with the exception that it has an `ID` field. You'll notice the BSON annotations. These annotations are the actual fields that would appear in the document within MongoDB.
+The above data structure is nearly identical to the `bson.M` that was used previously, with the exception that it has an `ID` field. You'll notice the BSON annotations. These annotations are the actual fields that would appear in the document within MongoDB. The `omitempty` means that if there is no data in the particular field, when saved to MongoDB the field will not exist on the document rather than existing with an empty value.
 
 So how can we work with our documents? Take the following:
 
