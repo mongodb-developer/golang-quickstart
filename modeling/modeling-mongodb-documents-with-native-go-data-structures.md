@@ -1,6 +1,6 @@
 # Modeling MongoDB Documents with Native Go Data Structures
 
-In the past few getting started tutorials, we explored the various ways to interact with MongoDB data using the Go programming language (Golang). In particular, we spent time exploring each of the [create](https://www.mongodb.com/blog/post/quick-start-golang--mongodb--how-to-create-documents), [retrieve](https://www.mongodb.com/blog/post/quick-start-golang--mongodb--how-to-read-documents), [update](https://www.mongodb.com/blog/post/quick-start-golang--mongodb--how-to-update-documents), and [delete](https://www.mongodb.com/blog/post/quick-start-golang--mongodb--how-to-delete-documents) (CRUD) operations, which are critical when building amazing applications.
+In the past few getting started tutorials, we explored the various ways to interact with MongoDB data using the [Go programming language](https://golang.org/) (Golang). In particular, we spent time exploring each of the [create](https://www.mongodb.com/blog/post/quick-start-golang--mongodb--how-to-create-documents), [retrieve](https://www.mongodb.com/blog/post/quick-start-golang--mongodb--how-to-read-documents), [update](https://www.mongodb.com/blog/post/quick-start-golang--mongodb--how-to-update-documents), and [delete](https://www.mongodb.com/blog/post/quick-start-golang--mongodb--how-to-delete-documents) (CRUD) operations, which are critical when building amazing applications.
 
 In each of the tutorials, we made use of `bson.A`, `bson.D`, and `bson.M`, which represent arrays, documents, and maps. However, these are primitive data structures that are part of the MongoDB Go driver, and not necessarily the best way for interacting with data, both within the application and the database.
 
@@ -49,6 +49,8 @@ type Podcast struct {
 ```
 
 The above data structure is nearly identical to the `bson.M` that was used previously, with the exception that it has an `ID` field. You'll notice the BSON annotations. These annotations are the actual fields that would appear in the document within MongoDB. The `omitempty` means that if there is no data in the particular field, when saved to MongoDB the field will not exist on the document rather than existing with an empty value.
+
+Some of the benefits to using native Go data structures to represent our data is having autocomplete available, error handling, and being able to write methods specific to the data structure.
 
 So how can we work with our documents? Take the following:
 
