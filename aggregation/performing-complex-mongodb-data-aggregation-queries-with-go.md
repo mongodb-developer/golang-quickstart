@@ -16,7 +16,7 @@ To be successful with this tutorial, you'll need the following requirements to b
 - MongoDB Atlas with an M0 cluster or better
 - The MongoDB Go driver
 
-It is advisable that you've completed the other tutorials in the getting started with MongoDB and Go series as it shares information around the schema that we're using as well as information on connecting to a cluster. However, if you feel comfortable with MongoDB and Go, it isn't an absolute requirement.
+It is advisable that you've completed the other tutorials in the getting started with MongoDB and Go series as it shares [information around the schema](https://www.mongodb.com/blog/post/quick-start-golang--mongodb--modeling-documents-with-go-data-structures) that we're using as well as information on [connecting to a cluster](https://www.mongodb.com/blog/post/quick-start-golang--mongodb--starting-and-setup). However, if you feel comfortable with MongoDB and Go, it isn't an absolute requirement.
 
 > Use promotional code [NICRABOY200](https://www.mongodb.com/cloud) to receive $200 in premium credit towards your MongoDB Atlas cluster if you'd like something more powerful than the forever free M0 cluster.
 
