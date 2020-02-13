@@ -10,6 +10,6 @@ A Quick Start series for developing applications with the Go programming languag
 4. [Updating MongoDB Documents with Go](updating/updating-mongodb-documents-with-go.md)
 5. [Deleting MongoDB Documents with Go](deleting/deleting-documents-in-a-mongodb-collection-with-go.md)
 6. [Modeling MongoDB Documents with Native Go Data Structures](modeling/modeling-mongodb-documents-with-native-go-data-structures.md)
-7. Performing Complex MongoDB Data Aggregation Queries with Go
+7. [Performing Complex MongoDB Data Aggregation Queries with Go](aggregation/performing-complex-mongodb-data-aggregation-queries-with-go.md)
 8. Reacting to Database Changes with MongoDB Change Streams and Go
 9. Multi-Document ACID Transactions in MongoDB with Go
