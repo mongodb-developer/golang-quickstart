@@ -113,26 +113,26 @@ For this aggregation query, we're going to focus on the `podcast` field as well 
 ```go
 id, _ := primitive.ObjectIDFromHex("5e3b37e51c9d4400004117e6")
 
-showInfoCursor, err := episodesCollection.Aggregate(ctx, []bson.D{
-    bson.D{{"$match", bson.D{{"podcast", id}}}},
-    bson.D{{"$group", bson.D{{"_id", "$podcast"}, {"total", bson.D{{"$sum", "$duration"}}}}}},
-})
+matchStage := bson.D{{"$match", bson.D{{"podcast", id}}}}
+groupStage := bson.D{{"$group", bson.D{{"_id", "$podcast"}, {"total", bson.D{{"$sum", "$duration"}}}}}}
+
+showInfoCursor, err := episodesCollection.Aggregate(ctx, mongo.Pipeline{matchStage, groupStage})
 if err != nil {
     panic(err)
 }
-var showsWithInfo []interface{}
+var showsWithInfo []bson.M
 if err = showInfoCursor.All(ctx, &showsWithInfo); err != nil {
     panic(err)
 }
 fmt.Println(showsWithInfo)
 ```
 
-Because the particular `podcast` is important to us, we are taking the id of the podcast in question and converting it into an object id that MongoDB and the Go driver can understand. In the `Aggregate` operation, we are matching all documents that have the `podcast` field in question. Then we are grouping the matches by the `podcast` field because it is non-distinct and summing each of the `duration` fields into a new `total` field.
+Because the particular `podcast` is important to us, we are taking the id of the podcast in question and converting it into an object id that MongoDB and the Go driver can understand. Next we are defining stages of the aggregation pipeline, in this case a matching stage and grouping stage. In the matching stage we are matching all documents that have the `podcast` field in question. In the grouping stage we are grouping the matches by the `podcast` field because it is non-distinct, and then we are summing each of the `duration` fields into a new `total` field. The `Aggregate` operation executes our defined pipeline.
 
 The result would look something like this:
 
 ```plaintext
-[[{_id ObjectID("5e3b37e51c9d4400004117e6")} {total 55}]]
+[map[_id:ObjectID("5e3b37e51c9d4400004117e6") total:55]]
 ```
 
 Had we altered the aggregation to include more `podcast` values, we could have ended up with several different podcast groups and their total minutes.
@@ -151,14 +151,14 @@ Let's look at another example. For this scenario, let's say we want to "join" do
 So what would our aggregation query look like if we wanted to include the podcast information with the episode information? We might try to do something like this:
 
 ```go
-showLoadedCursor, err := episodesCollection.Aggregate(ctx, []bson.D{
-    bson.D{{"$lookup", bson.D{{"from", "podcasts"}, {"localField", "podcast"}, {"foreignField", "_id"}, {"as", "podcast"}}}},
-    bson.D{{"$unwind", bson.D{{"path", "$podcast"}, {"preserveNullAndEmptyArrays", false}}}},
-})
+lookupStage := bson.D{{"$lookup", bson.D{{"from", "podcasts"}, {"localField", "podcast"}, {"foreignField", "_id"}, {"as", "podcast"}}}}
+unwindStage := bson.D{{"$unwind", bson.D{{"path", "$podcast"}, {"preserveNullAndEmptyArrays", false}}}}
+
+showLoadedCursor, err := episodesCollection.Aggregate(ctx, mongo.Pipeline{lookupStage, unwindStage})
 if err != nil {
     panic(err)
 }
-var showsLoaded []interface{}
+var showsLoaded []bson.M
 if err = showLoadedCursor.All(ctx, &showsLoaded); err != nil {
     panic(err)
 }
@@ -172,17 +172,16 @@ After the `$lookup` operation, we make use of the [$unwind](https://docs.mongodb
 If we were to run our aggregation, we might end up with results that look like this:
 
 ```plaintext
-[[{_id ObjectID("5e3b381c1c9d4400004117e7")} {podcast [{_id ObjectID("5e3b37e51c9d4400004117e6")} {name The Polyglot Developer Podcast} {author Nic Raboy} {tags 
-[development coding programming]}]} {title Episode #1} {description The first episode} {duration 25}] [{_id ObjectID("5e3b38511c9d4400004117e8")} {podcast [{_id 
-ObjectID("5e3b37e51c9d4400004117e6")} {name The Polyglot Developer Podcast} {author Nic Raboy} {tags [development coding programming]}]} {title Episode #2} {desc
-ription The second episode} {duration 30}]]
+[map[_id:ObjectID("5e3b381c1c9d4400004117e7") description:The first episode duration:25 podcast:map[_id:ObjectID("5e3b37e51c9d4400004117e6") author:Nic Raboy name:The Polygl
+ot Developer Podcast tags:[development coding programming]] title:Episode #1] map[_id:ObjectID("5e3b38511c9d4400004117e8") description:The second episode duration:30 podcast
+:map[_id:ObjectID("5e3b37e51c9d4400004117e6") author:Nic Raboy name:The Polyglot Developer Podcast tags:[development coding programming]] title:Episode #2]]
 ```
 
 Notice that each podcast episode in the above results is now printed with the show information. This saves you from having to execute multiple `Find` operations within your Go code.
 
 The above query that we saw is great, but I think we can do better.
 
-In the first example that used `$lookup` and `$unwind` we were using an `[]interface{}` to work with the results. Not the end of the world, but if we wanted to access particular fields, use an autocomplete, etc., things might get a little messy. Instead, we can create a native Go data structure to represent the results of our aggregation.
+In the first example that used `$lookup` and `$unwind` we were using an `[]bson.M` to work with the results. Not the end of the world, but if we wanted to access particular fields, use an autocomplete, etc., things might get a little messy. Instead, we can create a native Go data structure to represent the results of our aggregation.
 
 ```go
 // PodcastEpisode represents an aggregation result-set for two collections
@@ -200,10 +199,10 @@ For the most part the above data structure will look familiar. However, pay atte
 With this new data structure available, we can change our aggregation a bit:
 
 ```go
-showLoadedStructCursor, err := episodesCollection.Aggregate(ctx, []bson.D{
-    bson.D{{"$lookup", bson.D{{"from", "podcasts"}, {"localField", "podcast"}, {"foreignField", "_id"}, {"as", "podcast"}}}},
-    bson.D{{"$unwind", bson.D{{"path", "$podcast"}, {"preserveNullAndEmptyArrays", false}}}},
-})
+lookupStage := bson.D{{"$lookup", bson.D{{"from", "podcasts"}, {"localField", "podcast"}, {"foreignField", "_id"}, {"as", "podcast"}}}}
+unwindStage := bson.D{{"$unwind", bson.D{{"path", "$podcast"}, {"preserveNullAndEmptyArrays", false}}}}
+
+showLoadedStructCursor, err := episodesCollection.Aggregate(ctx, mongo.Pipeline{lookupStage, unwindStage})
 if err != nil {
     panic(err)
 }
@@ -214,7 +213,7 @@ if err = showLoadedStructCursor.All(ctx, &showsLoadedStruct); err != nil {
 fmt.Println(showsLoadedStruct)
 ```
 
-Notice that we're now using a `[]PodcastEpisode` to store the results rather than a `[]interface{}`. While we don't demonstrate it in this example, we would have access to each field within that data structure if we wanted to.
+Notice that we're now using a `[]PodcastEpisode` to store the results rather than a `[]bson.M`. While we don't demonstrate it in this example, we would have access to each field within that data structure if we wanted to.
 
 ## Conclusion
 

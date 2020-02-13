@@ -36,7 +36,6 @@ type PodcastEpisode struct {
 	Title       string             `bson:"title,omitempty"`
 	Description string             `bson:"description,omitempty"`
 	Duration    int32              `bson:"duration,omitempty"`
-	PublishDate int32              `bson:"publish_date,omitempty"`
 }
 
 func main() {
@@ -52,36 +51,32 @@ func main() {
 
 	id, _ := primitive.ObjectIDFromHex("5e3b37e51c9d4400004117e6")
 
-	showInfoCursor, err := episodesCollection.Aggregate(ctx, []bson.D{
-		bson.D{{"$match", bson.D{{"podcast", id}}}},
-		bson.D{{"$group", bson.D{{"_id", "$podcast"}, {"total", bson.D{{"$sum", "$duration"}}}}}},
-	})
+	matchStage := bson.D{{"$match", bson.D{{"podcast", id}}}}
+	groupStage := bson.D{{"$group", bson.D{{"_id", "$podcast"}, {"total", bson.D{{"$sum", "$duration"}}}}}}
+	showInfoCursor, err := episodesCollection.Aggregate(ctx, mongo.Pipeline{matchStage, groupStage})
 	if err != nil {
 		panic(err)
 	}
-	var showsWithInfo []interface{}
+	var showsWithInfo []bson.M
 	if err = showInfoCursor.All(ctx, &showsWithInfo); err != nil {
 		panic(err)
 	}
 	fmt.Println(showsWithInfo)
 
-	showLoadedCursor, err := episodesCollection.Aggregate(ctx, []bson.D{
-		bson.D{{"$lookup", bson.D{{"from", "podcasts"}, {"localField", "podcast"}, {"foreignField", "_id"}, {"as", "podcast"}}}},
-		bson.D{{"$unwind", bson.D{{"path", "$podcast"}, {"preserveNullAndEmptyArrays", false}}}},
-	})
+	lookupStage := bson.D{{"$lookup", bson.D{{"from", "podcasts"}, {"localField", "podcast"}, {"foreignField", "_id"}, {"as", "podcast"}}}}
+	unwindStage := bson.D{{"$unwind", bson.D{{"path", "$podcast"}, {"preserveNullAndEmptyArrays", false}}}}
+
+	showLoadedCursor, err := episodesCollection.Aggregate(ctx, mongo.Pipeline{lookupStage, unwindStage})
 	if err != nil {
 		panic(err)
 	}
-	var showsLoaded []interface{}
+	var showsLoaded []bson.M
 	if err = showLoadedCursor.All(ctx, &showsLoaded); err != nil {
 		panic(err)
 	}
 	fmt.Println(showsLoaded)
 
-	showLoadedStructCursor, err := episodesCollection.Aggregate(ctx, []bson.D{
-		bson.D{{"$lookup", bson.D{{"from", "podcasts"}, {"localField", "podcast"}, {"foreignField", "_id"}, {"as", "podcast"}}}},
-		bson.D{{"$unwind", bson.D{{"path", "$podcast"}, {"preserveNullAndEmptyArrays", false}}}},
-	})
+	showLoadedStructCursor, err := episodesCollection.Aggregate(ctx, mongo.Pipeline{lookupStage, unwindStage})
 	if err != nil {
 		panic(err)
 	}
