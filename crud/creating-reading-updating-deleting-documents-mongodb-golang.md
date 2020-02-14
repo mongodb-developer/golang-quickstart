@@ -13,7 +13,11 @@ There are a few requirements that must be met to be successful with this tutoria
 
 It is important that the MongoDB Atlas cluster is properly configured to allow connections from your locally running Go application or wherever you plan to host your application. By default, all external connections are denied.
 
-> Get started with an M0 cluster on [MongoDB Atlas](https://www.mongodb.com/cloud) today. It's free forever and you'll be able to work alongside this blog series. Use promo code NICRABOY200 when you sign up and you'll get an extra $200.00 credit applied to your account.
+<div class="callout">
+
+Get started with an M0 cluster on [MongoDB Atlas](https://www.mongodb.com/cloud) today. It's free forever and you'll be able to work alongside this blog series. Use promo code NICRABOY200 when you sign up and you'll get an extra $200.00 credit applied to your account.
+
+</div>
 
 It's also important that the Go driver has been properly configured for development on your computer, and this includes having [dep](https://github.com/golang/dep) installed to be used as the dependency management tool.
 
