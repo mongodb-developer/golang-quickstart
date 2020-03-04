@@ -185,7 +185,7 @@ map[_id:map[_data:825E4F03CF000000012B022C0100296E5A1004D960EAE47DBE4DC8AC61034A
 ckstart] operationType:insert]
 ```
 
-With change streams, you'll have access to the MongoDB aggregation pipeline and its operators. You can learn more about what's available in the [official documentation](http://docs.mongodb.com/manual/changeStreams/#modify-change-stream-output).
+With change streams, you'll have access to a subset of the MongoDB aggregation pipeline and its operators. You can learn more about what's available in the [official documentation](http://docs.mongodb.com/manual/changeStreams/#modify-change-stream-output).
 
 ## Conclusion
 
