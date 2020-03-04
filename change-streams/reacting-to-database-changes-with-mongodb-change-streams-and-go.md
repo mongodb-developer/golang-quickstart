@@ -112,10 +112,10 @@ import (
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
-func ChangeStream(waitGroup sync.WaitGroup, stream *mongo.ChangeStream) {
-	defer stream.Close(context.TODO())
+func iterateChangeStream(routineCtx context.Context, waitGroup sync.WaitGroup, stream *mongo.ChangeStream) {
+	defer stream.Close(routineCtx)
 	defer waitGroup.Done()
-	for stream.Next(context.TODO()) {
+	for stream.Next(routineCtx) {
 		var data bson.M
 		if err := stream.Decode(&data); err != nil {
 			panic(err)
@@ -141,7 +141,8 @@ func main() {
 		panic(err)
 	}
 	waitGroup.Add(1)
-	go ChangeStream(waitGroup, episodesStream)
+	routineCtx, cancelFn := context.WithCancel(context.Background())
+	go iterateChangeStream(routineCtx, waitGroup, episodesStream)
 
 	waitGroup.Wait()
 }
@@ -150,6 +151,8 @@ func main() {
 A few things are happening in the above code. We've moved the stream iteration into a separate function to be used in a goroutine. However, running the application would result in it terminating quite quickly because the `main` function will terminate not too longer after creating the goroutine. To resolve this, we are making use of a `WaitGroup`. In our example, the `main` function will wait until the `WaitGroup` is empty and the `WaitGroup` only becomes empty when the goroutine terminates.
 
 Making use of the `WaitGroup` isn't an absolute requirement as there are other ways to keep the application running while watching for changes. However, given the simplicity of this example, it made sense in order to see any changes in the stream.
+
+To keep the `iterateChangeStream` function from running indefinitely, we are creating and passing a context that can be canceled. While we don't demonstrate canceling the function, at least we know it can be done.
 
 ## Complicating the Change Stream with the Aggregation Pipeline
 
@@ -182,7 +185,7 @@ map[_id:map[_data:825E4F03CF000000012B022C0100296E5A1004D960EAE47DBE4DC8AC61034A
 ckstart] operationType:insert]
 ```
 
-With change streams, you'll have access to the full scope of the MongoDB aggregation pipeline and its operators. You can learn more about what's available in the [official documentation](https://docs.mongodb.com/manual/core/aggregation-pipeline/).
+With change streams, you'll have access to the MongoDB aggregation pipeline and its operators. You can learn more about what's available in the [official documentation](http://docs.mongodb.com/manual/changeStreams/#modify-change-stream-output).
 
 ## Conclusion
 
