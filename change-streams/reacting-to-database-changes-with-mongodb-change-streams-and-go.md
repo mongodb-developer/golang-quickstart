@@ -10,7 +10,7 @@ If you've been keeping up with my getting started with Go and MongoDB tutorial s
 - [Modeling MongoDB Documents with Native Go Data Structures](https://www.mongodb.com/blog/post/quick-start-golang--mongodb--modeling-documents-with-go-data-structures)
 - [Performing Complex MongoDB Data Aggregation Queries with Go](https://www.mongodb.com/blog/post/quick-start-golang--mongodb--data-aggregation-pipeline)
 
-In this tutorial we're going to explore change streams in MongoDB and how they might be useful, all with the Go programming language (Golang).
+In this tutorial we're going to explore [change streams](https://docs.mongodb.com/manual/changeStreams/) in MongoDB and how they might be useful, all with the Go programming language (Golang).
 
 Before we take a look at the code, let's take a step back and understand what change streams are and why there's often a need for them.
 
@@ -94,7 +94,7 @@ db:quickstart] operationType:replace]
 
 In the above example, I've done a `Replace` on a particular document in the collection. In addition to information about the data, I also receive the full document that includes the change. The results will vary depending on the `operationType` that takes place.
 
-While the code that we used would work fine, it is currently a blocking operation. If we wanted to watch for changes and continue to do other things, we'd want to use a goroutine for iterating over our change stream cursor.
+While the code that we used would work fine, it is currently a blocking operation. If we wanted to watch for changes and continue to do other things, we'd want to use a [goroutine](https://tour.golang.org/concurrency/1) for iterating over our change stream cursor.
 
 We could make some changes like this:
 
