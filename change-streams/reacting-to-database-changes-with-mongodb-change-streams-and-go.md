@@ -10,7 +10,7 @@ If you've been keeping up with my getting started with Go and MongoDB tutorial s
 - [Modeling MongoDB Documents with Native Go Data Structures](https://www.mongodb.com/blog/post/quick-start-golang--mongodb--modeling-documents-with-go-data-structures)
 - [Performing Complex MongoDB Data Aggregation Queries with Go](https://www.mongodb.com/blog/post/quick-start-golang--mongodb--data-aggregation-pipeline)
 
-In this tutorial we're going to explore change streams in MongoDB and how they might be useful, all with the Go programming language (Golang).
+In this tutorial we're going to explore [change streams](https://docs.mongodb.com/manual/changeStreams/) in MongoDB and how they might be useful, all with the Go programming language (Golang).
 
 Before we take a look at the code, let's take a step back and understand what change streams are and why there's often a need for them.
 
@@ -94,7 +94,7 @@ db:quickstart] operationType:replace]
 
 In the above example, I've done a `Replace` on a particular document in the collection. In addition to information about the data, I also receive the full document that includes the change. The results will vary depending on the `operationType` that takes place.
 
-While the code that we used would work fine, it is currently a blocking operation. If we wanted to watch for changes and continue to do other things, we'd want to use a goroutine for iterating over our change stream cursor.
+While the code that we used would work fine, it is currently a blocking operation. If we wanted to watch for changes and continue to do other things, we'd want to use a [goroutine](https://tour.golang.org/concurrency/1) for iterating over our change stream cursor.
 
 We could make some changes like this:
 
@@ -112,10 +112,10 @@ import (
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
-func ChangeStream(waitGroup sync.WaitGroup, stream *mongo.ChangeStream) {
-	defer stream.Close(context.TODO())
+func iterateChangeStream(routineCtx context.Context, waitGroup sync.WaitGroup, stream *mongo.ChangeStream) {
+	defer stream.Close(routineCtx)
 	defer waitGroup.Done()
-	for stream.Next(context.TODO()) {
+	for stream.Next(routineCtx) {
 		var data bson.M
 		if err := stream.Decode(&data); err != nil {
 			panic(err)
@@ -141,7 +141,8 @@ func main() {
 		panic(err)
 	}
 	waitGroup.Add(1)
-	go ChangeStream(waitGroup, episodesStream)
+	routineCtx, cancelFn := context.WithCancel(context.Background())
+	go iterateChangeStream(routineCtx, waitGroup, episodesStream)
 
 	waitGroup.Wait()
 }
@@ -150,6 +151,8 @@ func main() {
 A few things are happening in the above code. We've moved the stream iteration into a separate function to be used in a goroutine. However, running the application would result in it terminating quite quickly because the `main` function will terminate not too longer after creating the goroutine. To resolve this, we are making use of a `WaitGroup`. In our example, the `main` function will wait until the `WaitGroup` is empty and the `WaitGroup` only becomes empty when the goroutine terminates.
 
 Making use of the `WaitGroup` isn't an absolute requirement as there are other ways to keep the application running while watching for changes. However, given the simplicity of this example, it made sense in order to see any changes in the stream.
+
+To keep the `iterateChangeStream` function from running indefinitely, we are creating and passing a context that can be canceled. While we don't demonstrate canceling the function, at least we know it can be done.
 
 ## Complicating the Change Stream with the Aggregation Pipeline
 
@@ -182,7 +185,7 @@ map[_id:map[_data:825E4F03CF000000012B022C0100296E5A1004D960EAE47DBE4DC8AC61034A
 ckstart] operationType:insert]
 ```
 
-With change streams, you'll have access to the full scope of the MongoDB aggregation pipeline and its operators. You can learn more about what's available in the [official documentation](https://docs.mongodb.com/manual/core/aggregation-pipeline/).
+With change streams, you'll have access to a subset of the MongoDB aggregation pipeline and its operators. You can learn more about what's available in the [official documentation](http://docs.mongodb.com/manual/changeStreams/#modify-change-stream-output).
 
 ## Conclusion
 

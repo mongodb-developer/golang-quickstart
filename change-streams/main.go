@@ -11,15 +11,18 @@ import (
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
-func ChangeStream(waitGroup sync.WaitGroup, stream *mongo.ChangeStream) {
-	defer stream.Close(context.TODO())
+func iterateChangeStream(routineCtx context.Context, waitGroup sync.WaitGroup, stream *mongo.ChangeStream) {
+	defer stream.Close(routineCtx)
 	defer waitGroup.Done()
-	for stream.Next(context.TODO()) {
+	for stream.Next(routineCtx) {
 		var data bson.M
 		if err := stream.Decode(&data); err != nil {
 			panic(err)
 		}
 		fmt.Printf("%v\n", data)
+	}
+	if stream.Err() != nil {
+		panic(stream.Err())
 	}
 }
 
@@ -51,7 +54,8 @@ func main() {
 		panic(err)
 	}
 	waitGroup.Add(1)
-	go ChangeStream(waitGroup, episodesStream)
+	routineCtx, cancelFn := context.WithCancel(context.Background())
+	go iterateChangeStream(routineCtx, waitGroup, episodesStream)
 
 	waitGroup.Wait()
 }
