@@ -10,11 +10,13 @@ import (
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
-type Podcast struct {
-	ID     primitive.ObjectID `bson:"_id,omitempty"`
-	Title  string             `bson:"title,omitempty"`
-	Author string             `bson:"author,omitempty"`
-	Tags   []string           `bson:"tags,omitempty"`
+// Episode represents the schema for the "Episodes" collection
+type Episode struct {
+	ID          primitive.ObjectID `bson:"_id,omitempty"`
+	Podcast     primitive.ObjectID `bson:"podcast,omitempty"`
+	Title       string             `bson:"title,omitempty"`
+	Description string             `bson:"description,omitempty"`
+	Duration    int32              `bson:"duration,omitempty"`
 }
 
 func main() {
@@ -25,7 +27,7 @@ func main() {
 	defer client.Disconnect(context.TODO())
 
 	database := client.Database("quickstart")
-	podcastsCollection := database.Collection("podcasts")
+	episodesCollection := database.Collection("episodes")
 
 	session, err := client.StartSession()
 	if err != nil {
@@ -35,17 +37,21 @@ func main() {
 		panic(err)
 	}
 	err = mongo.WithSession(context.Background(), session, func(sessionContext mongo.SessionContext) error {
-		result, err := podcastsCollection.InsertOne(
+		result, err := episodesCollection.InsertOne(
 			sessionContext,
-			Podcast{
-				Title:  "Transactions for All",
-				Author: "Nic Raboy",
+			Episode{
+				Title:    "A Transaction Episode for the Ages",
+				Duration: 15,
 			},
 		)
-		if err != nil {
-			panic(err)
-		}
-		//panic(result.InsertedID)
+		fmt.Println(result.InsertedID)
+		result, err = episodesCollection.InsertOne(
+			sessionContext,
+			Episode{
+				Title:    "Transactions for All",
+				Duration: 2,
+			},
+		)
 		if err = session.CommitTransaction(sessionContext); err != nil {
 			panic(err)
 		}
