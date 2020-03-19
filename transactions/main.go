@@ -2,7 +2,6 @@ package main
 
 import (
 	"context"
-	"fmt"
 	"os"
 
 	"go.mongodb.org/mongo-driver/bson/primitive"
@@ -33,10 +32,38 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
-	if err = session.StartTransaction(); err != nil {
-		panic(err)
-	}
-	err = mongo.WithSession(context.Background(), session, func(sessionContext mongo.SessionContext) error {
+	defer session.EndSession(context.Background())
+
+	// err = mongo.WithSession(context.Background(), session, func(sessionContext mongo.SessionContext) error {
+	// 	if err = session.StartTransaction(); err != nil {
+	// 		panic(err)
+	// 	}
+	// 	result, err := episodesCollection.InsertOne(
+	// 		sessionContext,
+	// 		Episode{
+	// 			Title:    "A Transaction Episode for the Ages",
+	// 			Duration: 15,
+	// 		},
+	// 	)
+	// 	fmt.Println(result.InsertedID)
+	// 	result, err = episodesCollection.InsertOne(
+	// 		sessionContext,
+	// 		Episode{
+	// 			Title:    "Transactions for All",
+	// 			Duration: 2,
+	// 		},
+	// 	)
+	// 	if err = session.CommitTransaction(sessionContext); err != nil {
+	// 		panic(err)
+	// 	}
+	// 	fmt.Println(result.InsertedID)
+	// 	return nil
+	// })
+	// if err != nil {
+	// 	panic(err)
+	// }
+
+	_, err = session.WithTransaction(context.Background(), func(sessionContext mongo.SessionContext) (interface{}, error) {
 		result, err := episodesCollection.InsertOne(
 			sessionContext,
 			Episode{
@@ -44,7 +71,9 @@ func main() {
 				Duration: 15,
 			},
 		)
-		fmt.Println(result.InsertedID)
+		if err != nil {
+			return nil, err
+		}
 		result, err = episodesCollection.InsertOne(
 			sessionContext,
 			Episode{
@@ -52,14 +81,12 @@ func main() {
 				Duration: 2,
 			},
 		)
-		if err = session.CommitTransaction(sessionContext); err != nil {
-			panic(err)
+		if err != nil {
+			return nil, err
 		}
-		fmt.Println(result.InsertedID)
-		return nil
+		return result, err
 	})
 	if err != nil {
 		panic(err)
 	}
-	session.EndSession(context.Background())
 }

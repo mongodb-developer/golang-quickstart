@@ -108,10 +108,12 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
-	if err = session.StartTransaction(); err != nil {
-		panic(err)
-	}
+	defer session.EndSession(context.Background())
+
 	err = mongo.WithSession(context.Background(), session, func(sessionContext mongo.SessionContext) error {
+		if err = session.StartTransaction(); err != nil {
+			panic(err)
+		}
 		result, err := episodesCollection.InsertOne(
 			sessionContext,
 			Episode{
@@ -136,13 +138,63 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
-	session.EndSession(context.Background())
 }
 ```
 
 In the above code we start by starting a session which will encapsulate everything we want to do with atomicity. After, we start a transaction which we'll use to commit everything in the session.
 
-Inside the session we are doing two `InsertOne` operations. The first would succeed because it doesn't violate any of our schema validation rules. It will even print out an object id when it's done. However, the second operation will fail because it is less than two minutes. Because the `CommitTransaction` won't succeed, both `InsertOne` will not exist in the database even though the first would have succeeded.
+A `Session` represents a MongoDB logical session and can be used to enable casual consistency for a group of operations or to execute operations in an ACID transaction. More information on how they work in Go can be found in the [documentation](https://godoc.org/go.mongodb.org/mongo-driver/mongo#Session).
+
+Inside the session we are doing two `InsertOne` operations. The first would succeed because it doesn't violate any of our schema validation rules. It will even print out an object id when it's done. However, the second operation will fail because it is less than two minutes. The `CommitTransaction` won't ever run because of the error that the second operation created. For this reason, neither of the `InsertOne` operations will show up in the database.
+
+## Using a Convenient Transactions API
+
+Starting and committing transactions from within a logical session isn't the only way to work with ACID transactions using Golang and MongoDB. Instead, we can use what might be thought of as a more convenient transactions API.
+
+Take the following adjustments to our code:
+
+```go
+// ...
+
+func main() {
+	// ...
+
+	session, err := client.StartSession()
+	if err != nil {
+		panic(err)
+	}
+	defer session.EndSession(context.Background())
+
+	_, err = session.WithTransaction(context.Background(), func(sessionContext mongo.SessionContext) (interface{}, error) {
+		result, err := episodesCollection.InsertOne(
+			sessionContext,
+			Episode{
+				Title:    "A Transaction Episode for the Ages",
+				Duration: 15,
+			},
+		)
+		if err != nil {
+			return nil, err
+		}
+		result, err = episodesCollection.InsertOne(
+			sessionContext,
+			Episode{
+				Title:    "Transactions for All",
+				Duration: 2,
+			},
+		)
+		if err != nil {
+			return nil, err
+		}
+		return result, err
+	})
+	if err != nil {
+		panic(err)
+	}
+}
+```
+
+Instead of using `WithSession`, we are now using `WithTransaction`, which handles starting a transaction, executing some application code, and then committing or aborting the transaction based on the success of that application code. Not only that, but retries can happen for specific errors if certain operations fail.
 
 ## Conclusion
 
