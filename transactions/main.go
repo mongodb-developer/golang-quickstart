@@ -36,7 +36,7 @@ func main() {
 
 	// err = mongo.WithSession(context.Background(), session, func(sessionContext mongo.SessionContext) error {
 	// 	if err = session.StartTransaction(); err != nil {
-	// 		panic(err)
+	// 		return err
 	// 	}
 	// 	result, err := episodesCollection.InsertOne(
 	// 		sessionContext,
@@ -45,6 +45,9 @@ func main() {
 	// 			Duration: 15,
 	// 		},
 	// 	)
+	// 	if err != nil {
+	// 		return err
+	// 	}
 	// 	fmt.Println(result.InsertedID)
 	// 	result, err = episodesCollection.InsertOne(
 	// 		sessionContext,
@@ -53,13 +56,19 @@ func main() {
 	// 			Duration: 2,
 	// 		},
 	// 	)
+	// 	if err != nil {
+	// 		return err
+	// 	}
 	// 	if err = session.CommitTransaction(sessionContext); err != nil {
-	// 		panic(err)
+	// 		return err
 	// 	}
 	// 	fmt.Println(result.InsertedID)
 	// 	return nil
 	// })
 	// if err != nil {
+	// 	if abortErr := session.AbortTransaction(context.Background()); abortErr != nil {
+	// 		panic(abortErr)
+	// 	}
 	// 	panic(err)
 	// }
 

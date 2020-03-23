@@ -112,7 +112,7 @@ func main() {
 
 	err = mongo.WithSession(context.Background(), session, func(sessionContext mongo.SessionContext) error {
 		if err = session.StartTransaction(); err != nil {
-			panic(err)
+			return err
 		}
 		result, err := episodesCollection.InsertOne(
 			sessionContext,
@@ -120,7 +120,10 @@ func main() {
 				Title:    "A Transaction Episode for the Ages",
 				Duration: 15,
 			},
-        )
+		)
+		if err != nil {
+			return err
+		}
         fmt.Println(result.InsertedID)
 		result, err = episodesCollection.InsertOne(
 			sessionContext,
@@ -129,13 +132,19 @@ func main() {
 				Duration: 1,
 			},
 		)
+		if err != nil {
+			return err
+		}
 		if err = session.CommitTransaction(sessionContext); err != nil {
-			panic(err)
+			return err
         }
         fmt.Println(result.InsertedID)
 		return nil
 	})
 	if err != nil {
+		if abortErr := session.AbortTransaction(context.Background()); abortErr != nil {
+			panic(abortErr)
+		}
 		panic(err)
 	}
 }
@@ -145,7 +154,7 @@ In the above code we start by starting a session which will encapsulate everythi
 
 A `Session` represents a MongoDB logical session and can be used to enable casual consistency for a group of operations or to execute operations in an ACID transaction. More information on how they work in Go can be found in the [documentation](https://godoc.org/go.mongodb.org/mongo-driver/mongo#Session).
 
-Inside the session we are doing two `InsertOne` operations. The first would succeed because it doesn't violate any of our schema validation rules. It will even print out an object id when it's done. However, the second operation will fail because it is less than two minutes. The `CommitTransaction` won't ever run because of the error that the second operation created. For this reason, neither of the `InsertOne` operations will show up in the database.
+Inside the session we are doing two `InsertOne` operations. The first would succeed because it doesn't violate any of our schema validation rules. It will even print out an object id when it's done. However, the second operation will fail because it is less than two minutes. The `CommitTransaction` won't ever succeed because of the error that the second operation created. When the `WithSession` function returns the error that we created, the transaction is aborted using the `AbortTransaction` function. For this reason, neither of the `InsertOne` operations will show up in the database.
 
 ## Using a Convenient Transactions API
 
