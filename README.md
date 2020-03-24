@@ -12,4 +12,4 @@ A Quick Start series for developing applications with the Go programming languag
 6. [Modeling MongoDB Documents with Native Go Data Structures](modeling/modeling-mongodb-documents-with-native-go-data-structures.md)
 7. [Performing Complex MongoDB Data Aggregation Queries with Go](aggregation/performing-complex-mongodb-data-aggregation-queries-with-go.md)
 8. [Reacting to Database Changes with MongoDB Change Streams and Go](change-streams/reacting-to-database-changes-with-mongodb-change-streams-and-go.md)
-9. Multi-Document ACID Transactions in MongoDB with Go
+9. [Multi-Document ACID Transactions in MongoDB with Go](transactions/multi-document-acid-transactions-mongodb-go.md)
